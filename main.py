@@ -54,27 +54,14 @@ class Graph:
         """
         self.nodes[node.id] = node
 
-    def add_edge(
-        self, u: int, v: int, distance: float = None, resistance: float = None
-    ):
+    def add_edge(self, u: int, v: int, resistance: float = None):
         """
         ノードuとvの間にエッジを追加。
 
         * param u: ノードID
         * param v: ノードID
-        * param distance: ノード間距離 [m] (Noneの場合はノードの位置情報から計算)
-        * param resistance: 熱抵抗 [K/W] (Noneの場合は距離と熱伝導率、断面積から計算)
+        * param resistance: 熱抵抗 [K/W]
         """
-        # ノード間の距離を計算
-        if distance is None:
-            p1 = self.nodes[u].pos
-            p2 = self.nodes[v].pos
-            distance = float(np.linalg.norm(np.subtract(p1, p2)))
-
-        # 熱抵抗を計算
-        if resistance is None:
-            resistance = float(distance / (k * area))
-
         # エッジを追加
         e = Edge(u, v, resistance)
         self.edges.append(e)
@@ -142,13 +129,19 @@ for i, j in product(range(nx), range(ny)):
 
 # 次に全エッジを追加
 for i, j in product(range(nx), range(ny)):
-    u = i * ny + j
+    u = i * ny + j  # 始点ノードID
+
+    # 横方向にエッジを追加
     if i + 1 < nx:
-        v = (i + 1) * ny + j
-        G.add_edge(u, v)
+        v = (i + 1) * ny + j  # 終点ノードID
+        resistance = float(dx / (k * area))
+        G.add_edge(u, v, resistance)
+
+    # 縦方向にエッジを追加
     if j + 1 < ny:
-        v = i * ny + (j + 1)
-        G.add_edge(u, v)
+        v = i * ny + (j + 1)  # 終点ノードID
+        resistance = float(dy / (k * area))
+        G.add_edge(u, v, resistance)
 
 
 # -----------------------
