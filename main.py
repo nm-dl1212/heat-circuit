@@ -3,6 +3,15 @@ import matplotlib.pyplot as plt
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 from itertools import product
+from enum import Enum
+
+
+# -----------------------
+# 境界条件の種類
+# -----------------------
+class BoundaryType(Enum):
+    INTERIOR = 0  # 内部ノード
+    DIRICHLET = 1  # 温度固定
 
 
 # -----------------------
@@ -14,6 +23,8 @@ class Node:
     pos: Tuple[float, float, float]  # 位置情報 (x, y, z) [m]
     temperature: float = None  # 温度 [K]
     heat: float = 0.0  # 発熱量 [W]
+    boundary_type: BoundaryType = BoundaryType.INTERIOR  # 境界条件の種類
+    boundary_value: float = None  # 境界値（温度 or 熱流束） [K or W]
 
 
 @dataclass
@@ -111,11 +122,21 @@ G = Graph()
 
 # まず全ノードを追加
 for i, j in product(range(nx), range(ny)):
+    # 境界条件を判定
+    if i == 0 or i == nx - 1 or j == 0 or j == ny - 1:
+        boundary_type = BoundaryType.DIRICHLET
+        boundary_value = T_boundary
+    else:
+        boundary_type = BoundaryType.INTERIOR
+        boundary_value = None
+
     node = Node(
         id=i * ny + j,
         pos=(i * dx, j * dy, 0.0),
         temperature=None,
         heat=float(Q[i, j]),
+        boundary_type=boundary_type,
+        boundary_value=boundary_value,
     )
     G.add_node(node)
 
@@ -139,12 +160,10 @@ A = np.zeros((N, N))
 b = np.zeros(N)
 
 for node_id, node in G.nodes.items():
-    # 格子境界なら温度固定
-    i = node_id // ny
-    j = node_id % ny
-    if i == 0 or i == nx - 1 or j == 0 or j == ny - 1:
+    # 境界ノード：温度固定条件
+    if node.boundary_type == BoundaryType.DIRICHLET:
         A[node_id, node_id] = 1.0
-        b[node_id] = T_boundary
+        b[node_id] = node.boundary_value
         continue
 
     # 内部ノード: 隣接エッジのコンダクタンスを集める
