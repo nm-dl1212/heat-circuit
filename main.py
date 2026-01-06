@@ -31,7 +31,6 @@ class Node:
 class Edge:
     u: int  # 始点ノードID
     v: int  # 終点ノードID
-    distance: float  # ノード間距離 [m]
     resistance: float  # 熱抵抗 [K/W]
 
     @property
@@ -77,7 +76,7 @@ class Graph:
             resistance = float(distance / (k * area))
 
         # エッジを追加
-        e = Edge(u, v, distance, resistance)
+        e = Edge(u, v, resistance)
         self.edges.append(e)
 
     def neighbors(self, u: int) -> List[Edge]:
@@ -93,7 +92,7 @@ class Graph:
                 res.append(e)
             elif e.v == u:
                 # return a reversed view so caller sees e.u==u and e.v==neighbor
-                res.append(Edge(u, e.u, e.distance, e.resistance))
+                res.append(Edge(u, e.u, e.resistance))
         return res
 
 
