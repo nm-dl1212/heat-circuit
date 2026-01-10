@@ -91,7 +91,6 @@ dx, dy = 0.001, 0.001  # ノード間距離 [m]
 k = 236.0  # 熱伝導率 [W/mK] (アルミニウム)
 thickness = 0.001  # 板厚 [m]
 area = thickness * dy  # 断面積 [m^2]
-T_boundary = 300.0  # 境界温度 [K]
 
 # 熱源 [W]
 Q = np.zeros((nx, ny))
@@ -99,6 +98,10 @@ Q[20:30, 20:30] = 24.0 / 100
 Q[5:7, 18:20] = 12.0 / 4
 Q[12:14, 40:42] = 12.0 / 4
 
+# 境界条件
+BC = np.zeros((nx, ny))
+BC[[0, -1], :] = 300.0
+BC[:, [0, -1]] = 300.0
 
 # -----------------------
 # グラフの構築
@@ -109,9 +112,9 @@ G = Graph()
 # まず全ノードを追加
 for i, j in product(range(nx), range(ny)):
     # 境界条件を判定
-    if i == 0 or i == nx - 1 or j == 0 or j == ny - 1:
+    if BC[i, j] != 0.0:
         boundary_type = BoundaryType.DIRICHLET
-        boundary_value = T_boundary
+        boundary_value = BC[i, j]
     else:
         boundary_type = BoundaryType.INTERIOR
         boundary_value = None
