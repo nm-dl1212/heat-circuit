@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Debug src/main.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": []
+        },
+        {
+            "name": "Python: Debug with UV",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uv",
+            "args": ["run", "src/main.py"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
